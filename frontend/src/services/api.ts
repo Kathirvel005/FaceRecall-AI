@@ -73,6 +73,35 @@ export async function enrollSamples(
   return res.json();
 }
 
+export async function enrollFiles(
+  personId: number,
+  files: File[]
+): Promise<{
+  student_id: string;
+  name: string;
+  total_submitted: number;
+  accepted: number;
+  rejected: number;
+  rejection_reasons: string[];
+  total_registered_embeddings: number;
+}> {
+  const formData = new FormData();
+  files.forEach((file) => {
+    formData.append("files", file);
+  });
+
+  const res = await fetch(`${API_BASE_URL}/persons/${personId}/enroll-files`, {
+    method: "POST",
+    body: formData,
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.detail || "Failed to enroll files");
+  }
+  return res.json();
+}
+
+
 export async function fetchEvents(limit: number = 50): Promise<RecognitionEvent[]> {
   const res = await fetch(`${API_BASE_URL}/events?limit=${limit}`);
   if (!res.ok) throw new Error("Failed to fetch events");
