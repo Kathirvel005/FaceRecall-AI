@@ -118,9 +118,8 @@ class IdentityMatcher:
                     details={"reason": "AMBIGUOUS_CLOSE_MATCH", "second_score": round(second_score, 4)}
                 )
 
-        # 5. Threshold Checks
+        # 5. Threshold Checks: KNOWN (Green) if score meets threshold, otherwise UNKNOWN (Red)
         if best_score >= self.similarity_threshold:
-            # KNOWN Candidate
             return MatchDecision(
                 person_id=best_pid,
                 name=best_name,
@@ -129,25 +128,15 @@ class IdentityMatcher:
                 confidence=best_score * quality.quality_score,
                 details={"matched_samples": len(person_scores[best_pid])}
             )
-        elif best_score < self.unknown_threshold:
-            # Explicit UNKNOWN
+        else:
             return MatchDecision(
                 person_id=None,
                 name="UNKNOWN",
                 status="UNKNOWN",
                 similarity=best_score,
                 confidence=1.0 - best_score,
-                details={"reason": f"SIMILARITY_BELOW_UNKNOWN_THRESHOLD ({best_score:.3f} < {self.unknown_threshold})"}
+                details={"reason": f"SIMILARITY_BELOW_THRESHOLD ({best_score:.3f} < {self.similarity_threshold})"}
             )
-        else:
-            # Borderline confidence
-            return MatchDecision(
-                person_id=best_pid,
-                name=best_name,
-                status="VERIFYING",
-                similarity=best_score,
-                confidence=best_score * quality.quality_score,
-                details={"reason": f"BORDERLINE_SIMILARITY ({best_score:.3f})"}
-            )
+
 
 identity_matcher = IdentityMatcher()

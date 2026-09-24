@@ -63,16 +63,10 @@ class TrackIdentityHistory:
                 matched_name = next(name for pid, name, sim in known_pairs if pid == best_pid)
                 avg_sim = float(np.mean(matched_sims))
                 return best_pid, matched_name, "KNOWN", round(avg_sim, 4), round(avg_quality, 4)
-            else:
-                # Some matches but below confirmation ratio -> VERIFYING
-                matched_name = next(name for pid, name, sim in known_pairs if pid == best_pid)
-                return best_pid, matched_name, "VERIFYING", 0.0, round(avg_quality, 4)
 
-        # 3. If UNKNOWN dominates
-        if status_counts.get("UNKNOWN", 0) / float(n_obs) >= 0.5:
-            return None, "UNKNOWN", "UNKNOWN", 0.0, round(avg_quality, 4)
+        # 3. Otherwise, classify explicitly as UNKNOWN (Red)
+        return None, "UNKNOWN", "UNKNOWN", 0.0, round(avg_quality, 4)
 
-        return None, "VERIFYING", "VERIFYING", 0.0, round(avg_quality, 4)
 
 
 class TemporalSmoothingManager:

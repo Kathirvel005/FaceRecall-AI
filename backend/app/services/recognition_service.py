@@ -119,7 +119,7 @@ class RecognitionPipeline:
             # Determine whether to run heavy ArcFace embedding
             needs_recognition = (
                 (self.frame_count % self.recognition_interval == 0) or
-                (track.status == "VERIFYING") or
+                (track.status == "UNKNOWN") or
                 (track.hits <= 2)
             )
 

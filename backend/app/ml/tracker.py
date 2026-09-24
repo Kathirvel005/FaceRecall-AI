@@ -31,7 +31,7 @@ class TrackedFace:
         # Recognition state
         self.person_id: Optional[str] = None
         self.name: str = "UNKNOWN"
-        self.status: str = "VERIFYING"  # KNOWN, UNKNOWN, LOW_QUALITY, VERIFYING
+        self.status: str = "UNKNOWN"  # KNOWN, UNKNOWN, LOW_QUALITY
         self.similarity: float = 0.0
         self.quality: float = 0.0
         self.history_names: List[str] = []

@@ -13,6 +13,8 @@ export default function DashboardPage() {
   const [isWsConnected, setIsWsConnected] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const wsRef = useRef<WebSocket | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const imgRef = useRef<HTMLImageElement | null>(null);
 
   // Poll system info & persons list
   useEffect(() => {
@@ -63,6 +65,96 @@ export default function DashboardPage() {
     };
   }, []);
 
+  // Real-time canvas overlay: Green for Known, Red for Unknown
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !frameSummary || !frameSummary.faces) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const srcW = frameSummary.frame_width || 1280;
+    const srcH = frameSummary.frame_height || 720;
+    const srcAspect = srcW / srcH;
+    const boxAspect = rect.width / rect.height;
+
+    let renderW = rect.width;
+    let renderH = rect.height;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    if (boxAspect > srcAspect) {
+      renderW = rect.height * srcAspect;
+      offsetX = (rect.width - renderW) / 2;
+    } else {
+      renderH = rect.width / srcAspect;
+      offsetY = (rect.height - renderH) / 2;
+    }
+
+    const scaleX = renderW / srcW;
+    const scaleY = renderH / srcH;
+
+    frameSummary.faces.forEach((face) => {
+      const [origX1, origY1, origX2, origY2] = face.bbox;
+      const x1 = offsetX + origX1 * scaleX;
+      const y1 = offsetY + origY1 * scaleY;
+      const x2 = offsetX + origX2 * scaleX;
+      const y2 = offsetY + origY2 * scaleY;
+      const w = x2 - x1;
+      const h = y2 - y1;
+
+      const isKnown = face.status === "KNOWN";
+      const strokeColor = isKnown ? "#22c55e" : "#ef4444";
+      const fillColor = isKnown ? "rgba(34, 197, 94, 0.18)" : "rgba(239, 68, 68, 0.18)";
+      const badgeBg = isKnown ? "#15803d" : "#b91c1c";
+
+      ctx.save();
+      ctx.shadowColor = strokeColor;
+      ctx.shadowBlur = 6;
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = 2.5;
+      ctx.fillStyle = fillColor;
+
+      ctx.beginPath();
+      ctx.roundRect(x1, y1, w, h, 6);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+
+      if (face.landmarks) {
+        ctx.fillStyle = strokeColor;
+        face.landmarks.forEach(([lx, ly]) => {
+          ctx.beginPath();
+          ctx.arc(offsetX + lx * scaleX, offsetY + ly * scaleY, 2.5, 0, 2 * Math.PI);
+          ctx.fill();
+        });
+      }
+
+      const badgeText = isKnown
+        ? `${face.name} | ${Math.round(face.similarity * 100)}%`
+        : "UNKNOWN";
+
+      ctx.font = "bold 11px sans-serif";
+      const textWidth = ctx.measureText(badgeText).width;
+      const badgeH = 26;
+      const badgeW = textWidth + 14;
+      const badgeY = Math.max(0, y1 - badgeH - 3);
+
+      ctx.fillStyle = badgeBg;
+      ctx.beginPath();
+      ctx.roundRect(x1, badgeY, badgeW, badgeH, 4);
+      ctx.fill();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.fillText(badgeText, x1 + 7, badgeY + 17);
+    });
+  }, [frameSummary]);
+
   const handleToggleCamera = async (start: boolean) => {
     setIsProcessing(true);
     try {
@@ -77,6 +169,7 @@ export default function DashboardPage() {
   };
 
   const isCamRunning = systemInfo?.camera_status?.is_running ?? false;
+
 
   return (
     <div className="space-y-6">
@@ -184,11 +277,18 @@ export default function DashboardPage() {
 
           <div className="relative bg-black flex items-center justify-center min-h-[360px] aspect-video">
             {isCamRunning ? (
-              <img
-                src={`${API_BASE_URL}/camera/stream`}
-                alt="Live Camera Feed"
-                className="w-full h-full object-contain"
-              />
+              <>
+                <img
+                  ref={imgRef}
+                  src={`${API_BASE_URL}/camera/stream`}
+                  alt="Live Camera Feed"
+                  className="w-full h-full object-contain"
+                />
+                <canvas
+                  ref={canvasRef}
+                  className="absolute inset-0 pointer-events-none w-full h-full"
+                />
+              </>
             ) : (
               <div className="text-center p-8">
                 <span className="text-4xl">📷</span>

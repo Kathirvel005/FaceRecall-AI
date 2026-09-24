@@ -93,23 +93,15 @@ export default function LiveRecognitionPage() {
       const w = x2 - x1;
       const h = y2 - y1;
 
-      // Color scheme based on state
-      let strokeColor = "#06b6d4"; // Cyan: VERIFYING
-      let fillColor = "rgba(6, 182, 212, 0.15)";
-      let badgeBg = "#0891b2";
+      // Clear color scheme: KNOWN = Green, UNKNOWN = Red
+      let strokeColor = "#ef4444"; // Red: UNKNOWN
+      let fillColor = "rgba(239, 68, 68, 0.18)";
+      let badgeBg = "#b91c1c";
 
       if (face.status === "KNOWN") {
-        strokeColor = "#10b981"; // Emerald
-        fillColor = "rgba(16, 185, 129, 0.15)";
-        badgeBg = "#059669";
-      } else if (face.status === "UNKNOWN") {
-        strokeColor = "#ef4444"; // Red/Rose
-        fillColor = "rgba(239, 68, 68, 0.15)";
-        badgeBg = "#dc2626";
-      } else if (face.status === "LOW_QUALITY") {
-        strokeColor = "#8b5cf6"; // Purple
-        fillColor = "rgba(139, 92, 246, 0.15)";
-        badgeBg = "#7c3aed";
+        strokeColor = "#22c55e"; // Green: KNOWN
+        fillColor = "rgba(34, 197, 94, 0.18)";
+        badgeBg = "#15803d";
       }
 
       // 1. Draw Bounding Box with subtle glow
@@ -139,8 +131,13 @@ export default function LiveRecognitionPage() {
       }
 
       // 3. Draw Top Information Badge
-      const badgeText = `${face.name} ${face.status === "KNOWN" ? `| ${Math.round(face.similarity * 100)}%` : `[${face.status}]`}`;
-      const subText = `Track #${face.track_id} · Q: ${(face.quality * 100).toFixed(0)}%`;
+      const isKnown = face.status === "KNOWN";
+      const badgeText = isKnown
+        ? `${face.name} | ${Math.round(face.similarity * 100)}%`
+        : "UNKNOWN";
+      const subText = isKnown
+        ? `Track #${face.track_id} · Q: ${(face.quality * 100).toFixed(0)}%`
+        : `Unregistered · Track #${face.track_id}`;
 
       ctx.font = "bold 12px sans-serif";
       const textWidth = Math.max(ctx.measureText(badgeText).width, ctx.measureText(subText).width);
@@ -183,22 +180,14 @@ export default function LiveRecognitionPage() {
         </div>
 
         {/* Legend */}
-        <div className="flex items-center space-x-3 text-xs bg-gray-900/60 border border-gray-800 px-3.5 py-2 rounded-lg">
-          <div className="flex items-center space-x-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-            <span className="text-gray-300">Known</span>
+        <div className="flex items-center space-x-3 text-xs bg-gray-900/80 border border-gray-800 px-4 py-2 rounded-xl">
+          <div className="flex items-center space-x-2">
+            <span className="w-3 h-3 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
+            <span className="text-emerald-400 font-semibold">Known (Green)</span>
           </div>
-          <div className="flex items-center space-x-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-            <span className="text-gray-300">Unknown</span>
-          </div>
-          <div className="flex items-center space-x-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-500" />
-            <span className="text-gray-300">Verifying</span>
-          </div>
-          <div className="flex items-center space-x-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-purple-500" />
-            <span className="text-gray-300">Low Quality</span>
+          <div className="flex items-center space-x-2">
+            <span className="w-3 h-3 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50" />
+            <span className="text-rose-400 font-semibold">Unknown (Red)</span>
           </div>
         </div>
       </div>
@@ -259,24 +248,22 @@ export default function LiveRecognitionPage() {
                     onClick={() => setSelectedFace(f)}
                     className={`p-3 rounded-lg border cursor-pointer transition-all ${
                       f.status === "KNOWN"
-                        ? "bg-emerald-950/20 border-emerald-800/40 hover:border-emerald-500/50"
-                        : f.status === "UNKNOWN"
-                        ? "bg-rose-950/20 border-rose-800/40 hover:border-rose-500/50"
-                        : "bg-cyan-950/20 border-cyan-800/40 hover:border-cyan-500/50"
+                        ? "bg-emerald-950/25 border-emerald-700/50 hover:border-emerald-500"
+                        : "bg-rose-950/25 border-rose-700/50 hover:border-rose-500"
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-white">{f.name}</span>
+                      <span className="text-xs font-bold text-white">
+                        {f.status === "KNOWN" ? f.name : "Unknown Face"}
+                      </span>
                       <span
-                        className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-medium ${
+                        className={`text-[10px] px-2 py-0.5 rounded font-mono font-bold ${
                           f.status === "KNOWN"
-                            ? "bg-emerald-500/20 text-emerald-400"
-                            : f.status === "UNKNOWN"
-                            ? "bg-rose-500/20 text-rose-400"
-                            : "bg-cyan-500/20 text-cyan-400"
+                            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                            : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
                         }`}
                       >
-                        {f.status}
+                        {f.status === "KNOWN" ? "KNOWN" : "UNKNOWN"}
                       </span>
                     </div>
 
