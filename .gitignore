@@ -1,0 +1,52 @@
+# Python Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# Python Cache & Compiled Files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# Environment & Secrets
+.env
+*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Node.js & Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/.vercel/
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+node_modules/
+
+# Runtime Application Data
+data/logs/*.log
+data/classroom_faces.db
+data/faces/*
+!data/faces/.gitkeep
+data/embeddings/*.index
+data/embeddings/*.json
+!data/embeddings/.gitkeep
+
+# Models (> 100MB exceed GitHub file limits)
+models/*.onnx
+!models/.gitkeep
+
+# Operating System & IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
