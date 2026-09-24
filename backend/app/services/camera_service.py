@@ -76,6 +76,7 @@ class CameraEngine:
             self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
             self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
             self.cap.set(cv2.CAP_PROP_FPS, self.target_fps)
+            self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
             # Query actual resolution
             actual_w = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))

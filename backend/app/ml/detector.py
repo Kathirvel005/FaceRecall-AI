@@ -65,6 +65,8 @@ class SCRFDDetector:
 
         # Session options for optimization
         sess_options = ort.SessionOptions()
+        sess_options.intra_op_num_threads = min(4, os.cpu_count() or 4)
+        sess_options.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
         sess_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
 
         logger.info(f"Loading SCRFD Detector from {resolved_path} with providers: {providers}")

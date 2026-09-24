@@ -111,7 +111,7 @@ export default function RegisterStudentPage() {
         clearInterval(interval);
         setIsCapturingAuto(false);
       }
-    }, 400);
+    }, 180);
   };
 
   // Process File Uploads (Drag & Drop or File Input)

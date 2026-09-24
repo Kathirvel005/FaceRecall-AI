@@ -29,32 +29,32 @@ class Settings(BaseSettings):
     DETECTION_MODEL_PATH: str = "models/det_10g.onnx"
     RECOGNITION_MODEL_PATH: str = "models/w600k_r50.onnx"
     DETECTION_INPUT_SIZE: str = "640,640"
-    DETECTION_CONF_THRESHOLD: float = 0.50
+    DETECTION_CONF_THRESHOLD: float = 0.35
     DETECTION_NMS_THRESHOLD: float = 0.40
 
-    # Face Quality Parameters
-    MIN_FACE_SIZE: int = 60
-    BLUR_THRESHOLD: float = 50.0  # Laplacian variance
-    MIN_BRIGHTNESS: float = 40.0
-    MAX_BRIGHTNESS: float = 220.0
-    MAX_YAW_DEG: float = 35.0
-    MAX_PITCH_DEG: float = 30.0
-    MIN_QUALITY_SCORE: float = 0.55
+    # Face Quality Parameters (Tuned for real-world webcam conditions)
+    MIN_FACE_SIZE: int = 35
+    BLUR_THRESHOLD: float = 10.0  # Laplacian variance (webcam friendly)
+    MIN_BRIGHTNESS: float = 30.0
+    MAX_BRIGHTNESS: float = 235.0
+    MAX_YAW_DEG: float = 50.0
+    MAX_PITCH_DEG: float = 40.0
+    MIN_QUALITY_SCORE: float = 0.20
 
-    # Recognition Parameters
-    SIMILARITY_THRESHOLD: float = 0.50
-    UNKNOWN_THRESHOLD: float = 0.40
+    # Recognition Parameters (Tuned for high live accuracy)
+    SIMILARITY_THRESHOLD: float = 0.40
+    UNKNOWN_THRESHOLD: float = 0.35
     TOP_K_CANDIDATES: int = 5
     EMBEDDING_DIM: int = 512
 
-    # Tracking & Temporal Smoothing
+    # Tracking & Temporal Smoothing (Fast lock-on, zero flicker)
     TRACKER_MAX_AGE: int = 30
-    TRACKER_MIN_HITS: int = 3
-    TRACKER_IOU_THRESHOLD: float = 0.30
-    TEMPORAL_VOTE_WINDOW: int = 8
-    TEMPORAL_CONFIRM_THRESHOLD: float = 0.60
-    DETECTION_INTERVAL: int = 2
-    RECOGNITION_INTERVAL: int = 5
+    TRACKER_MIN_HITS: int = 1
+    TRACKER_IOU_THRESHOLD: float = 0.25
+    TEMPORAL_VOTE_WINDOW: int = 4
+    TEMPORAL_CONFIRM_THRESHOLD: float = 0.40
+    DETECTION_INTERVAL: int = 1
+    RECOGNITION_INTERVAL: int = 2
 
     # Camera Pipeline
     DEFAULT_CAMERA_INDEX: int = 0

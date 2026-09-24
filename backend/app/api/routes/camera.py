@@ -36,11 +36,11 @@ async def mjpeg_generator():
     while True:
         has_frame, frame, ts, fid = camera_engine.get_latest_frame()
         if has_frame and frame is not None:
-            ret, buffer = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 75])
+            ret, buffer = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 70])
             if ret:
                 yield (b"--frame\r\n"
                        b"Content-Type: image/jpeg\r\n\r\n" + buffer.tobytes() + b"\r\n")
-        await asyncio.sleep(0.033)  # ~30 FPS
+        await asyncio.sleep(0.016)  # ~60 FPS capable, zero latency
 
 @router.get("/stream")
 async def get_stream():

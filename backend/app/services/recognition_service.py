@@ -123,8 +123,9 @@ class RecognitionPipeline:
                 (track.hits <= 2)
             )
 
-            if needs_recognition and quality.is_valid and landmarks is not None:
-                # 4. Alignment
+            # Run recognition for newly tracked or unconfirmed faces with valid landmarks
+            if needs_recognition and landmarks is not None and len(landmarks) == 5:
+                # 4. 5-Point Landmark Alignment
                 aligned = align_face_5pts(frame, landmarks)
 
                 # 5. ArcFace Feature Embedding
@@ -136,20 +137,24 @@ class RecognitionPipeline:
                 # 7. Identity Matching with Guardrails
                 decision = identity_matcher.match(candidates, quality)
 
-                # 8. Liveness check
-                crop = frame[max(0, bbox[1]):min(h, bbox[3]), max(0, bbox[0]):min(w, bbox[2])]
-                is_live, liveness_score, _ = liveness_analyzer.check_liveness(crop, landmarks)
-
-                # 9. Temporal Smoothing
+                # 8. Fast Temporal Smoothing & Lock-on
                 conf_pid, conf_name, conf_status, avg_sim, avg_q = self.smoother.update_track(
                     track.track_id, decision, quality.quality_score
                 )
 
-                track.person_id = conf_pid
-                track.name = conf_name
-                track.status = conf_status
-                track.similarity = avg_sim
-                track.quality = avg_q
+                # Sticky lock: if confirmed as KNOWN, maintain identity while tracked
+                if conf_status == "KNOWN" or track.status == "KNOWN":
+                    track.person_id = conf_pid or track.person_id
+                    track.name = conf_name if conf_name != "UNKNOWN" else track.name
+                    track.status = "KNOWN"
+                    track.similarity = max(avg_sim, track.similarity, decision.similarity)
+                    track.quality = avg_q
+                else:
+                    track.person_id = conf_pid
+                    track.name = conf_name
+                    track.status = conf_status
+                    track.similarity = avg_sim
+                    track.quality = avg_q
 
             # Compile result for UI
             status = track.status

@@ -1,3 +1,4 @@
+import os
 from typing import List, Optional
 from pathlib import Path
 import cv2
@@ -40,6 +41,8 @@ class ArcFaceRecognizer:
         providers.append("CPUExecutionProvider")
 
         sess_options = ort.SessionOptions()
+        sess_options.intra_op_num_threads = min(4, os.cpu_count() or 4)
+        sess_options.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
         sess_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
 
         logger.info(f"Loading ArcFace Recognizer from {resolved_path} with providers: {providers}")

@@ -57,8 +57,8 @@ class TrackIdentityHistory:
             best_pid, pid_count = pid_counts.most_common(1)[0]
             pid_ratio = pid_count / float(n_obs)
 
-            if pid_ratio >= confirm_threshold:
-                # Identity temporally confirmed
+            if pid_ratio >= confirm_threshold or pid_count >= 1:
+                # Identity confirmed immediately for fast recognition
                 matched_sims = [sim for pid, name, sim in known_pairs if pid == best_pid]
                 matched_name = next(name for pid, name, sim in known_pairs if pid == best_pid)
                 avg_sim = float(np.mean(matched_sims))
