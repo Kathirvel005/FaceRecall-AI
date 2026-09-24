@@ -104,21 +104,7 @@ class IdentityMatcher:
         best_pid, best_score, best_meta = aggregated[0]
         best_name = str(best_meta.get("name", "UNKNOWN"))
 
-        # 4. Anti-False-Match Ambiguity Check:
-        # If top 2 candidates are different persons with negligible difference, flag as VERIFYING
-        if len(aggregated) > 1:
-            second_pid, second_score, _ = aggregated[1]
-            if second_pid != best_pid and (best_score - second_score) < 0.03 and best_score >= self.similarity_threshold:
-                return MatchDecision(
-                    person_id=best_pid,
-                    name=best_name,
-                    status="VERIFYING",
-                    similarity=best_score,
-                    confidence=best_score * quality.quality_score,
-                    details={"reason": "AMBIGUOUS_CLOSE_MATCH", "second_score": round(second_score, 4)}
-                )
-
-        # 5. Threshold Checks: KNOWN (Green) if score meets threshold, otherwise UNKNOWN (Red)
+        # 4. Threshold Checks: KNOWN (Green) if score meets threshold, otherwise UNKNOWN (Red)
         if best_score >= self.similarity_threshold:
             return MatchDecision(
                 person_id=best_pid,
